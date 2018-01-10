@@ -1,0 +1,29 @@
+{
+  "name": "schat",
+  "version": "1.0.0",
+  "description": "Simple steam chat CLI tool.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lw2904/schat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lw2904/schat/issues"
+  },
+  "homepage": "https://github.com/lw2904/schat#readme",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "fwd": "^0.2.2",
+    "moment": "^2.20.1",
+    "steam-totp": "^2.0.1",
+    "steam-user": "^3.24.0",
+    "steamcommunity": "^3.34.0",
+    "steamid": "^1.1.0"
+  }
+}
