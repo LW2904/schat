@@ -4,7 +4,8 @@ const time = () => require('moment')().format('hh:mm:SSA')
 const config = {
   error: 'red',
   warn: 'yellow',
-  debug: 'blue' 
+  debug: 'blue',
+  info: 'green'
 }
 
 colors.setTheme(config)
