@@ -28,6 +28,8 @@ global.rl = readline.createInterface({
 // The last (newest) message message we received. 
 let lastReceived = {  }
 
+chat.on('ready', () => log.info(`ready`))
+
 chat.on('dictionary', dict => {
   log.debug(`built dictionary`)
 })

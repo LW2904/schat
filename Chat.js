@@ -13,6 +13,8 @@ const Chat = module.exports = class extends User {
 
       // Go online to receive messages.
       this.client.setPersona(User.EPersonaState['Busy'])
+
+      this.emit('ready') // We are now ready to receive and send messages.
     }).then(() => this.buildDictionary(this.client.steamID)).then(dict => {
       this.dictionary = dict
       this.emit('dictionary', this.dictionary)
