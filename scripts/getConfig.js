@@ -2,7 +2,8 @@ const fs = require('fs')
 const path = require('path')
 
 const ARGS = process.argv.slice(2)
-const CONFIG = path.join(require('os').homedir(), '.steam.json')
+const CONFIG = path.join(require('os').homedir(), '.steam.json') ||
+  ARGS.includes('--config') ? ARGS.indexOf('--config') + 1 : undefined
 
 global.DEV = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
 
@@ -36,7 +37,9 @@ if (fs.existsSync(CONFIG) && validJSON(CONFIG)) {
   if (!account)
     throw new Error(`Couldn't get an account.`) 
 
-  global.API_KEY = account.apikey || accounts.default.apikey
+  global.API_KEY = account.apikey ||
+    accounts.default.apikey ||
+    ARGS.includes('--apikey') ? ARGS.indexOf('--apikey') + 1 : undefined
 
   return global.ACCOUNT = account
 }
