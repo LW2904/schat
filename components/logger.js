@@ -26,7 +26,7 @@ const log = module.exports = Object.keys(config).reduce((acc, val, i, arr) => {
 
     console.log(`${time()} ${val[val]} - ${msg}`)
     
-    if (global.DEV && process.argv.includes('--verbose'))
+    if (process.argv.includes('--verbose'))
       args[0] && console.log(args)
   }
 
