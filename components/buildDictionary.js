@@ -5,34 +5,30 @@ const getFriends = require('../scripts/getFriends');
 
 const community = new (require('steamcommunity'))();
 
-const getInfo = (id) => {
-  return new Promise((resolve, reject) => {
-    community.getSteamUser(new SteamID(id), (err, user) => {
-      if (err) {
-        debug(`failed to get profile for ${id}`, err);
-        resolve();
-      }
-      
-      resolve({
-        steamID: user.steamID,
-        name: user.name,
-        onlineState: user.onlineState,
-        stateMessage: user.stateMessage,
-        avatar: user.getAvatarURL(),
-        customURL: '/' + user.customURL
-      });
+const getInfo = (id) => new Promise((resolve, reject) => {
+  community.getSteamUser(new SteamID(id), (err, user) => {
+    if (err) {
+      debug(`failed to get profile for ${id}`, err);
+      resolve();
+    }
+    
+    resolve({
+      steamID: user.steamID,
+      name: user.name,
+      onlineState: user.onlineState,
+      stateMessage: user.stateMessage,
+      avatar: user.getAvatarURL(),
+      customURL: '/' + user.customURL
     });
   });
-}
+});
 
-const expand = (friends) => {
-  debug(`getting details of ${friends.length} profiles`);
+const expand = (friends) => new Promise((resolve, reject) => {
+  debug(`getting details of ${friends.length} profiles`);  
 
-  return new Promise((resolve, reject) => {
-    Promise.all(friends.map(e => getInfo(e.steamid)))
-      .then(resolve).catch(console.log);
-  });
-}
+  Promise.all(friends.map(e => getInfo(e.steamid)))
+    .then(resolve).catch(console.log);
+});
 
 // Build an object of friends of user with id, and populate it with their data.
 const build = module.exports = async (id) => {
