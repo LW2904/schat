@@ -20,8 +20,6 @@ const Chat = module.exports = class extends User {
     this.dictionary = await this.buildDictionary(this.client.steamID);
     this.emit('dictionary', this.dictionary);
 
-    debug(this.dictionary);
-
     this.client.on('friendMessage', (senderID, content) => {
       let message = {
         content,
