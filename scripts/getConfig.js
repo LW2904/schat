@@ -1,45 +1,72 @@
 const fs = require('fs')
-const path = require('path')
+const { join } = require('path')
 
-const ARGS = process.argv.slice(2)
-const CONFIG = path.join(require('os').homedir(), '.steam.json') ||
-  ARGS.includes('--config') ? ARGS.indexOf('--config') + 1 : undefined
+// Get account from: 
+//   - args (--user name --pass secret)
+//   - accounts
+//      - args (--account alias)
+//      - default (account with alias default)
 
-global.DEV = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
+// Get API Key from:
+//   - args (--apikey key)
+//   - chosen account
+//   - default account
 
-// Get account in the following order:
-//  - process args --user & --pass
-//  - --account in config file
-//  - config file default
-
-const validJSON = path => {
-  let failed = false
+const validFile = path => {
+  let failed = false;
   try { require(path) } catch(e) { failed = true }
-  return !failed
+  return !failed;
 }
 
-if (ARGS.includes('--user') && ARGS.includes('--pass')) {
-  return global.ACCOUNT = {
-    accountName: ARGS[ARGS.indexOf('--user') + 1],
-    password: ARGS[ARGS.indexOf('--pass') + 1]    
-  }
+const parseArgs = (args) => {
+  return args.reduce((acc, cur, i, arr) => {
+    console.log(acc, cur, arr[i - 1]);
+
+    if (cur[0] === '-' && cur[1] !== '-') {
+      acc[cur.slice(1)] = true;
+
+      return acc;
+    }
+
+    if (cur.slice(0, 2) === '--') {
+      acc[cur.slice(2)] = undefined;
+
+      return acc;
+    }
+
+    acc[arr[i - 1].slice(2)] = cur;
+
+    return acc;
+  }, {})
 }
 
-if (fs.existsSync(CONFIG) && validJSON(CONFIG)) {
-  let account
-  let accounts = require(CONFIG)
+const getConfig = module.exports = () => {
+  const args = parseArgs(process.argv.slice(2));
+  const path = args.config 
+    || join(require('os').homedir(), '.steam.json')
+
+  global.DEV = process.env.NODE_ENV === 'dev'
+    || process.env.NODE_ENV === 'development'
+
+  if (fs.existsSync(path) && validFile(path)) {
+    const accounts = require(path);
+    const account = accounts[args.account || 'default'];
     
-  if (ARGS.includes('--account'))
-    account = accounts[ARGS[ARGS.indexOf('--account') + 1]]
-  else 
-    account = accounts.default
+    global.ACCOUNT = account;
+    global.API_KEY = args.apikey 
+      || account.apikey 
+      || accounts.default.apikey
+  }
 
-  if (!account)
-    throw new Error(`Couldn't get an account.`) 
+  if (args.user && args.pass) {
+    global.ACCOUNT = {
+      accountName: args.user,
+      password: args.pass,  
+    }
+  }
 
-  global.API_KEY = account.apikey ||
-    accounts.default.apikey ||
-    ARGS.includes('--apikey') ? ARGS.indexOf('--apikey') + 1 : undefined
+  if (!global.ACCOUNT) { throw new Error(`Couldn't get account!`) }
+  if (!global.API_KEY) { throw new Error(`Couldn't get api key!`) }
 
-  return global.ACCOUNT = account
+  return;
 }
