@@ -10,17 +10,17 @@ const getInfo = (id) => {
     community.getSteamUser(new SteamID(id), (err, user) => {
       if (err) {
         debug(`failed to get profile for ${id}`, err);
-        return;
+        resolve();
       }
       
-      return {
+      resolve({
         steamID: user.steamID,
         name: user.name,
         onlineState: user.onlineState,
         stateMessage: user.stateMessage,
         avatar: user.getAvatarURL(),
         customURL: '/' + user.customURL
-      };
+      });
     });
   });
 }
