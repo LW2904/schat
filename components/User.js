@@ -51,8 +51,8 @@ const User = module.exports = class extends EventEmitter {
         if (!global.rl.codeListen) { return; }
         callback(input.trim());
         global.rl.codeListen = false;
-      })
-    })
+      });
+    });
 
     return new Promise((resolve, reject) => {
       // Unlike loggedOn, only emitted when we really are logged on.
@@ -70,7 +70,7 @@ const User = module.exports = class extends EventEmitter {
 
         // Retry if not fatal (e.g. because steam is being buggy)
         setTimeout(this.client.logOn, 30 * 1000, this.account);
-      })
-    })
+      });
+    });
   }
 }
