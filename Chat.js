@@ -35,6 +35,8 @@ const Chat = module.exports = class extends User {
   }
 
   send(recipient, message) {
+    if (!recipient) { return; }
+
     this.client.chatMessage(recipient, message || '');
   }
 }
