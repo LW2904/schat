@@ -42,7 +42,9 @@ const parseArgs = (args) => {
 }
 
 const getConfig = module.exports = () => {
-  const args = parseArgs(process.argv.slice(2));
+  // Arguments passed with '-xyz' or '--xyz abc', parsed into object.
+  const args = parseArgs(process.argv.slice(2)); 
+  // Path to config file.
   const path = args.config 
     || join(require('os').homedir(), '.steam.json')
 
