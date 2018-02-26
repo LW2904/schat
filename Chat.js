@@ -1,42 +1,44 @@
-const User = require('./components/User')
-
-const moment = require('moment')
-
-const log = require('./components/logger')
+const moment = require('moment');
+const User = require('./components/User');
+const debug = require('debug')('app:chat');
 
 const Chat = module.exports = class extends User {
   constructor(account) {
-    super(account)
+    super(account);
 
-    this.logOn().then(() => {
-      log.debug(`logged on`)
+    this.build().catch(debug);
+  }
 
-      // Go online to receive messages.
-      this.client.setPersona(User.EPersonaState['Busy'])
+  async build() {
+    await this.logOn();
 
-      this.emit('ready') // We are now ready to receive and send messages.
-    }).then(() => this.buildDictionary(this.client.steamID)).then(dict => {
-      this.dictionary = dict
-      this.emit('dictionary', this.dictionary)
-    }).catch(log.error) // This should never throw.
+    debug(`logged on`);
+
+    this.client.setPersona(User.EPersonaState['Busy']);
+    this.emit('ready');
+
+    this.dictionary = await this.buildDictionary(this.client.steamID);
+    this.emit('dictionary', this.dictionary);
+
+    debug(this.dictionary);
 
     this.client.on('friendMessage', (senderID, content) => {
       let message = {
         content,
         sender: this.dictionary
-          .filter(e =>
-            e.steamID.toString() === senderID.toString())[0] ||
-            { id: senderID },
-        formattedDate: moment().format('h:mm:ss a')
-      }
+          .filter(
+            (e) => e.steamID.toString() === senderID.toString()
+          )[0] || { id: senderID },
+        formattedDate: moment().format('h:mm:ss a'),
+      };
 
-      this.emit('message', message)
+      this.emit('message', message);
     })
   }
 
   send(recipient, message) {
-    this.client.chatMessage(recipient, message || '')
+    this.client.chatMessage(recipient, message || '');
   }
 }
 
-Chat.prototype.buildDictionary = require('./components/buildDictionary')
+Chat.prototype.buildDictionary = require('./components/buildDictionary');
