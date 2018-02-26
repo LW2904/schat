@@ -1,71 +1,79 @@
-const Chat = require('./Chat')
+require('dotenv').config();
 
-const log = require('./components/logger')
-
-const readline = require('readline')
+const Chat = require('./Chat');
+const readline = require('readline');
+const debug = require('debug')('app');
 
 // Prepare global object with config, this throws if it misses something that
 // can't be prompted.
-require('./scripts/getConfig')
+require('./scripts/getConfig')();
 
-let chat = new Chat(global.ACCOUNT)
+const chat = new Chat(global.ACCOUNT)
 
 // Setup global radline interface with autocompletion.
 global.rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line, callback) => {
-    if (!chat.dictionary) // Fallback to empty array if not yet initialised.
-      return callback(null, [ [], line ])
+    if (!chat.dictionary) { // Fallback to empty array if not yet initialised.
+      return callback(null, [ [], line ]);
+    }
 
     const hits = Object.values(chat.dictionary)
-      .map(e => e.name).filter(e => e.startsWith(line))
+      .map((e) => e.name).filter(e => e.startsWith(line));
 
-    callback(null, [ hits, line ])
+    callback(null, [ hits, line ]);
   }
 })
 
 // The last (newest) message message we received. 
-let lastReceived = {  }
+let lastReceived = {};
 
-chat.on('ready', () => log.info(`ready`))
+chat.on('ready', () => debug(`ready`));
 
 chat.on('dictionary', dict => {
-  log.debug(`built dictionary`)
-})
+  debug(`built dictionary`);
+});
 
 // Output incoming messages and update last received message.
 chat.on('message', message => {
-  log.debug(`received message`, message)
+  debug(`received message`, message);
 
-  lastReceived = message
+  lastReceived = message;
 
   console.log(`[${message.formattedDate}] `
     + `${message.sender.name || message.sender.id.toString()} > `
-    + `${message.content}`)
-})
+    + `${message.content}`);
+});
 
 // Handle and parse user input.
 rl.on('line', input => {
-  if (global.rl.configListen || global.rl.codeListen)
-    return // handled by other listeners
+  if (global.rl.configListen || global.rl.codeListen) {
+    return; // Handled by other listeners.
+  }
 
-  if (input.includes('/'))
-    return // TODO: handle command
+  if (input.includes('/')) {
+    return; // TODO: handle command
+  }
 
   // Either:
   //  'recipient < message' or
   //  '^ message' where recipient is sender of last received message.
-  let message = input.slice(input.indexOf(input.includes('<') ? '<' : '^') + 1)
-  let recipient = input.includes('<')
-    ? chat.dictionary.filter(e => 
-        e.name === input.slice(0, input.indexOf('<')).trim())[0].steamID
+  const message = input.slice(
+    input.indexOf(input.includes('<') ? '<' : '^') + 1
+  );
+
+  const recipient = input.includes('<')
+    ? chat.dictionary.filter(
+        (e) => e.name === input.slice(0, input.indexOf('<')).trim()
+      )[0].steamID
     : input.includes('^') 
       ? lastReceived.sender ? lastReceived.sender.id : undefined
       : undefined
 
-  if (!recipient)
-    return log.warn(`invalid recipient`)
+  if (!recipient) {
+    return debug(`invalid recipient`);
+  }
 
-  return chat.send(recipient, message)
+  chat.send(recipient, message);
 })
