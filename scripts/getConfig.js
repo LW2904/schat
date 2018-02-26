@@ -1,5 +1,6 @@
-const fs = require('fs')
-const { join } = require('path')
+const fs = require('fs');
+const { join } = require('path');
+const debug = require('debug')('app:config');
 
 // Get account from: 
 //   - args (--user name --pass secret)
@@ -37,7 +38,7 @@ const parseArgs = (args) => {
     acc[arr[i - 1].slice(2)] = cur;
 
     return acc;
-  }, {})
+  }, {});
 }
 
 const getConfig = module.exports = () => {
@@ -56,9 +57,16 @@ const getConfig = module.exports = () => {
     global.API_KEY = args.apikey 
       || account.apikey 
       || accounts.default.apikey
+
+    debug(`got account from config file`);
   }
 
   if (args.user && args.pass) {
+    debug(global.ACCOUNT 
+      ? `overwriting account with data from args` 
+      : `getting account from args`
+    );
+
     global.ACCOUNT = {
       accountName: args.user,
       password: args.pass,  
