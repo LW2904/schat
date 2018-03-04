@@ -4,7 +4,6 @@ const SteamUser = require('steam-user');
 const steamTotp = require('steam-totp');
 const debug = require('debug')('app:user');
 
-
 // steam-user wrapper.
 const User = module.exports = class extends EventEmitter {
   constructor(account) {
